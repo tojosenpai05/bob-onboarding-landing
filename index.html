@@ -56,8 +56,8 @@ p{margin:0 0 1em;max-width:68ch}
 .hero{background:var(--ink);color:#fff;padding:64px 0 72px}
 .hero .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center}
 .hero .eyebrow{color:var(--yellow)}
-.hero h1{font-size:clamp(2.4rem,5.4vw,3.9rem);font-weight:700;letter-spacing:-.02em;margin:14px 0 18px}
-.hero h1 span{background:var(--yellow);color:var(--ink);padding:0 .15em}
+.hero h1{font-size:clamp(2.2rem,4.4vw,3.2rem);font-weight:700;letter-spacing:-.02em;margin:14px 0 18px}
+.hero h1 span{background:var(--yellow);color:var(--ink);padding:0 .15em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .hero .lead{color:#d6d5cf}
 .hero code{font-family:var(--mono);background:#262624;color:var(--yellow);padding:1px 6px;border-radius:4px;font-size:.92em}
 .ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
@@ -70,12 +70,52 @@ p{margin:0 0 1em;max-width:68ch}
 .hero figcaption{font-size:.85rem;color:#a9a8a1;margin-top:10px}
 @media (max-width:900px){.hero .wrap{grid-template-columns:1fr}}
 
-/* stat strip */
-.strip{background:var(--yellow)}
-.strip ul{list-style:none;margin:0 auto;padding:22px 20px;max-width:1120px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.strip b{display:block;font-size:clamp(1.5rem,3vw,2.1rem);line-height:1.1}
-.strip span{font-size:.9rem;color:#3b3000}
-@media (max-width:700px){.strip ul{grid-template-columns:repeat(2,1fr)}}
+/* at a glance */
+.glance{background:var(--yellow);padding:0;border-bottom:none}
+.glance ol{list-style:none;margin:0 auto;padding:34px 20px;max-width:1120px;display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.glance li{background:var(--surface);border-radius:8px;padding:22px;position:relative}
+.glance li:not(:last-child)::after{content:"→";position:absolute;right:-19px;top:50%;transform:translateY(-50%);font-weight:700;font-size:1.3rem}
+.glance .k{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.glance b{display:block;font-size:1.25rem;line-height:1.25;margin:8px 0 8px}
+.glance p{font-size:.95rem;color:var(--ink-2);margin:0}
+@media (max-width:860px){.glance ol{grid-template-columns:1fr;gap:26px}.glance li:not(:last-child)::after{content:"↓";right:auto;top:auto;left:50%;bottom:-25px;transform:translateX(-50%)}}
+
+/* pipeline diagram */
+.flow{margin:0}
+.lane{display:grid;gap:12px}
+.lane.in{grid-template-columns:repeat(3,1fr)}
+.lane.out{grid-template-columns:1fr 1fr}
+.lane-label{grid-column:1/-1;font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.chip{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px 16px;font-weight:600}
+.chip small{display:block;font-weight:400;color:var(--muted);font-size:.86rem;margin-top:2px}
+.chip ul{margin:8px 0 0;padding-left:18px;font-weight:400;font-size:.92rem;color:var(--ink-2)}
+.down{text-align:center;font-size:1.5rem;line-height:1;margin:10px 0;font-weight:700}
+.bob{background:var(--ink);color:#fff;border-radius:12px;padding:24px}
+.bob .lane-label{color:var(--yellow)}
+.stages{list-style:none;margin:16px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:22px 36px}
+.stage{position:relative;background:#1f1f1d;border:1px solid #3a3a37;border-radius:8px;padding:14px}
+.stage b{font-family:var(--mono);color:var(--yellow);font-size:.78rem;display:block;margin-bottom:2px}
+.stage .t{font-weight:600;display:block}
+.stage small{display:block;color:#b8b7b0;font-size:.83rem;margin-top:4px;line-height:1.4}
+.stage::after{content:"→";position:absolute;right:-27px;top:50%;transform:translateY(-50%);color:var(--yellow);font-size:1.25rem;font-weight:700}
+.stage:nth-child(4n)::after{content:none}
+.stage.gate{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+.stage.gate b,.stage.gate small{color:#3b3000}
+.par{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:4px}
+.par li{font-size:.78rem;background:#2b2b28;border-left:3px solid var(--yellow);padding:3px 7px;border-radius:3px;color:#e6e5df}
+.loop{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:.72rem;color:var(--yellow);border:1px dashed var(--yellow);padding:2px 6px;border-radius:4px}
+@media (max-width:860px){
+  .stages{grid-template-columns:1fr 1fr}
+  .stages .stage::after{content:"→"}
+  .stages .stage:nth-child(2n)::after{content:none}
+  .lane.in{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  .stages{grid-template-columns:1fr;gap:30px}
+  .stages .stage:nth-child(n)::after{content:"↓";right:auto;left:50%;top:auto;bottom:-26px;transform:translateX(-50%)}
+  .stages .stage:last-child::after{content:none}
+  .lane.out{grid-template-columns:1fr}
+}
 
 /* sections */
 section{padding:84px 0;border-bottom:1px solid var(--line)}
@@ -184,8 +224,9 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:.95r
   <div class="wrap">
     <a class="brand eyebrow" href="#top"><i aria-hidden="true"></i>Bob Onboarding Pipeline</a>
     <ul>
+      <li><a href="#pipeline">How it works</a></li>
       <li><a href="#problem">Problem</a></li>
-      <li><a href="#how">How it works</a></li>
+      <li><a href="#how">Walkthrough</a></li>
       <li><a href="#demo">Demo</a></li>
       <li><a href="#results">Results</a></li>
       <li><a href="#research">Research</a></li>
@@ -197,12 +238,12 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:.95r
 <header class="hero" id="top">
   <div class="wrap">
     <div>
-      <span class="eyebrow">IBM Bob 2.0 Hackathon · Proof of concept</span>
-      <h1>Onboard a new hire with <span>one command</span>.</h1>
-      <p class="lead">One <code>/onboard</code> command in IBM Bob IDE scans a real codebase and hands a new hire a personalised onboarding pack — a PDF, a narrated code tour, one file per real issue found, and a context folder for their own Bob. Every claim is checked against the code, and a human approves before anything is sent.</p>
+      <span class="eyebrow">IBM Bob 2.0 Hackathon · Bob Onboarding Pipeline</span>
+      <h1>Bob writes every new hire's onboarding pack <span>from the real code</span>.</h1>
+      <p class="lead">New developers spend weeks figuring out a codebase while seniors keep re-explaining it. We built a skill for IBM Bob IDE: a manager types <code>/onboard</code>, Bob reads the repository, and the new hire gets a personalised guide, a narrated code tour, the known issues, and a ready-made context for their own Bob. Everything is checked against the code, and a person approves it before it's sent.</p>
       <div class="ctas">
-        <a class="btn primary" href="#demo">See the real output</a>
-        <a class="btn ghost" href="assets/northwind-labs-onboarding-alex-tan.pdf">Read the PDF</a>
+        <a class="btn primary" href="#pipeline">How it works</a>
+        <a class="btn ghost" href="#demo">See the real output</a>
         <a class="btn ghost" href="https://github.com/arisyasyahirah/NORTHWIND-LABS-bob2.0-hackathon-submission-">Source on GitHub</a>
       </div>
     </div>
@@ -215,21 +256,79 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:.95r
   </div>
 </header>
 
-<div class="strip" role="region" aria-label="Demo run at a glance">
-  <ul>
-    <li><b>10</b><span>real issues found, each cited to file:line</span></li>
-    <li><b>7 pages</b><span>personalised onboarding PDF</span></li>
-    <li><b>~21 min</b><span>unattended machine time for the pack</span></li>
-    <li><b>~1 min</b><span>of human approval</span></li>
-  </ul>
-</div>
-
 <main id="main">
+
+<section class="glance" aria-label="The project in 30 seconds">
+  <ol>
+    <li>
+      <span class="k">The problem</span>
+      <b>Onboarding lives in seniors' heads.</b>
+      <p>Developers spend <strong>~58%</strong> of their time just understanding code. New hires get a stale README, and seniors lose hours answering the same questions for every new person.</p>
+    </li>
+    <li>
+      <span class="k">What we built</span>
+      <b>One <code>/onboard</code> command in IBM Bob IDE.</b>
+      <p>The manager answers a few questions. Bob scans the repo with four parallel subagents, checks every claim against the code, waits for the manager's approval, then renders and emails the pack.</p>
+    </li>
+    <li>
+      <span class="k">The result</span>
+      <b>A full pack in ~21 minutes, ~3 minutes of senior time.</b>
+      <p>In our demo run: a 7-page PDF, a 97-second code tour, and 10 real issues found — against an estimated 4–8 hours to write the same pack by hand.</p>
+    </li>
+  </ol>
+</section>
+
+<section id="pipeline" class="alt">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">How it works</span>
+      <h2>The pipeline at a glance.</h2>
+      <p class="lead">What goes in, what Bob does inside the IDE, and what comes out.</p>
+    </div>
+    <figure class="flow" aria-label="Pipeline diagram: inputs, eight stages inside Bob IDE, and outputs">
+      <div class="lane in">
+        <span class="lane-label">In</span>
+        <div class="chip">The real codebase<small>opened read-only, never modified</small></div>
+        <div class="chip">The company's folder<small>handbook, values, role descriptions</small></div>
+        <div class="chip">The manager's answers<small>hire's name, role, start date, buddy</small></div>
+      </div>
+      <div class="down" aria-hidden="true">↓</div>
+      <div class="bob">
+        <span class="lane-label">Inside IBM Bob IDE · one <code>/onboard</code> command</span>
+        <ol class="stages">
+          <li class="stage"><b>1</b><span class="t">Intake</span><small>Bob asks the manager a few questions and confirms the repo.</small></li>
+          <li class="stage"><b>2</b><span class="t">Generate</span><small>4 subagents in parallel:</small>
+            <ul class="par"><li>Company &amp; role</li><li>Architecture &amp; code tour</li><li>Issue scan</li><li>Tech stack</li></ul></li>
+          <li class="stage"><b>3</b><span class="t">Merge</span><small>One pack for the hire, a brief for the manager, a dated timeline, a video script.</small></li>
+          <li class="stage"><b>4</b><span class="t">Check</span><small>Plain Python confirms every cited file and line exists.</small><span class="loop">↺ fix loop, max 3 tries</span></li>
+          <li class="stage"><b>5</b><span class="t">Flag</span><small>Anything unconfirmed becomes "Unknown — ask your buddy".</small></li>
+          <li class="stage gate"><b>6</b><span class="t">Manager approves</span><small>Hard stop. Nothing is rendered or sent without a yes.</small></li>
+          <li class="stage"><b>7</b><span class="t">Render</span><small>Branded PDF and a narrated video tour.</small></li>
+          <li class="stage"><b>8</b><span class="t">Package &amp; send</span><small>Context zip, setup guide, and two emails via Bob's MCP email server.</small></li>
+        </ol>
+      </div>
+      <div class="down" aria-hidden="true">↓</div>
+      <div class="lane out">
+        <span class="lane-label">Out</span>
+        <div class="chip">The new hire gets
+          <ul><li>A personalised onboarding PDF</li><li>A narrated video tour of the code</li><li>One file per known issue, with file and line</li><li>A context pack that gives their own Bob this company, role and codebase</li><li>Replies to the email go straight to their buddy</li></ul>
+        </div>
+        <div class="chip">The manager gets
+          <ul><li>A day-1 brief: what to say, who to introduce, check-in dates</li><li>An access checklist to set up before day one</li><li>The gaps Bob couldn't confirm, to fix before the hire starts</li></ul>
+        </div>
+      </div>
+    </figure>
+    <div class="callout" style="margin-top:28px">
+      <p><b>Where IBM Bob does the work:</b> the whole pipeline is a packaged Bob skill run in Agent mode. Bob asks the intake questions, runs the four subagents in parallel, repairs failed checks in a bounded fix loop, and sends the emails through an MCP server that Bob itself built and tested for this project.</p>
+    </div>
+  </div>
+</section>
+
 
 <section id="problem">
   <div class="wrap">
     <div class="head">
-      <span class="eyebrow">The problem</span>
+      <span class="eyebrow">The problem, in detail</span>
       <h2>Onboarding runs on a stale README and a senior's memory.</h2>
       <p class="lead">Every new hire gets a different ramp-up, and the team pays twice: the newcomer's time spent figuring the code out, and the senior's time spent re-explaining it. This isn't an anecdote — independent studies keep landing on the same pattern.</p>
     </div>
@@ -286,22 +385,21 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:.95r
 <section id="how" class="alt">
   <div class="wrap">
     <div class="head">
-      <span class="eyebrow">How it works</span>
-      <h2>Eight stages, one command, a human in the loop.</h2>
-      <p class="lead">A packaged Bob skill runs the whole flow in Agent mode. Screenshots below are from the real run — not mockups.</p>
+      <span class="eyebrow">Walkthrough</span>
+      <h2>The same eight stages, in the real run.</h2>
+      <p class="lead">Screenshots from the actual demo run inside Bob IDE — not mockups.</p>
     </div>
     <ol class="steps">
       <li class="step">
-        <div><span class="num">01</span><h3>Preflight</h3><p>Bob activates the <code>onboarding-pipeline</code> skill, and checks that its email MCP server is built and registered.</p></div>
-        <a class="shot" href="assets/shots/1-preflight.png"><img src="assets/shots/1-preflight.png" alt="Bob IDE: Bob explores the workspace and asks to approve the onboarding-pipeline skill." loading="lazy" width="716" height="962"></a>
-      </li>
-      <li class="step">
-        <div><span class="num">02</span><h3>Intake</h3><p>Bob asks for the codebase (opened read-only, never modified), the company, and the hire's role, dates, manager and buddy. It probes the repo and confirms what it found before going further.</p></div>
+        <div><span class="num">01</span><h3>Intake</h3><p>Bob starts the <code>onboarding-pipeline</code> skill, checks its email server is ready, then asks for the codebase (opened read-only), the company, and the hire's role, dates, manager and buddy. It probes the repo and confirms what it found before going further.</p></div>
         <a class="shot" href="assets/shots/2-intake-probe.png"><img src="assets/shots/2-intake-probe.png" alt="Bob probes the target codebase, reports languages and structure, and asks to confirm it is the right project." loading="lazy" width="986" height="511"></a>
       </li>
       <li class="step">
-        <div><span class="num">03</span><h3>Generate — 4 subagents in parallel</h3><p>Company &amp; role, architecture &amp; code tour, issue scan, and tech stack all run at once against the real repo.</p></div>
+        <div><span class="num">02</span><h3>Generate — 4 subagents in parallel</h3><p>Company &amp; role, architecture &amp; code tour, issue scan, and tech stack all run at once against the real repo.</p></div>
         <a class="shot" href="assets/shots/3-parallel-subagents.png"><img src="assets/shots/3-parallel-subagents.png" alt="Four Bob subagents running in parallel: role, tech stack, architecture, and issue files." loading="lazy" width="1027" height="457"></a>
+      </li>
+      <li class="step noimg">
+        <div><span class="num">03</span><h3>Merge</h3><p>Bob combines the four drafts into one pack for the new hire, a brief for the manager, a dated 90-day timeline, and — if a video was requested — the video script.</p></div>
       </li>
       <li class="step">
         <div><span class="num">04</span><h3>Deterministic check</h3><p>Plain Python — not the model — verifies that every cited file and line exists in the repo, that issue files follow the template, and that the video script only retells facts already in the pack. When a check fails, a bounded fix loop repairs it (max 3 tries per stage) or asks the user.</p><p class="gate">Nothing is graded by the thing that wrote it.</p></div>
@@ -311,7 +409,7 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:.95r
         <div><span class="num">05</span><h3>Flag</h3><p>Anything Bob couldn't confirm is written as "Unknown — ask your buddy" and listed on a short flagged-for-review list (3–6 bullets), instead of being buried or invented.</p></div>
       </li>
       <li class="step">
-        <div><span class="num">06</span><h3>Human approval — hard stop</h3><p>A person reviews the flagged list and the issue index, and must approve before anything is rendered or sent. Tool auto-approve does not count as approval.</p></div>
+        <div><span class="num">06</span><h3>Manager approves — hard stop</h3><p>A person reviews the flagged list and the issue index, and must approve before anything is rendered or sent. Tool auto-approve does not count as approval.</p></div>
         <a class="shot" href="assets/shots/6-human-approval.png"><img src="assets/shots/6-human-approval.png" alt="Stage 5 human approval: the issue table with file locations and dates, and approve / skip video / review script / correct options." loading="lazy" width="1086" height="926"></a>
       </li>
       <li class="step">
@@ -409,7 +507,7 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:.95r
           <tr><td>Emails sent</td><td>2 (newcomer + manager) through a Bob-built MCP server, to a test inbox</td></tr>
           <tr><td>Machine time — the pack</td><td>~21 min (intake → generate → check → render PDF → package → send)</td></tr>
           <tr><td>Machine time — optional video</td><td>35 min in this run (a layout fix loop, then a re-render)</td></tr>
-          <tr><td>Human approval</td><td>~1 min</td></tr>
+          <tr><td>Senior's time</td><td>~3 min (~2 min answering intake questions + ~1 min approving)</td></tr>
         </tbody>
       </table>
     </div>
@@ -505,6 +603,14 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:.95r
       <h2>Bob-native, end to end.</h2>
     </div>
     <p>This isn't a hosted web app — the pipeline runs inside IBM Bob IDE. A packaged Bob skill (<code>/onboard</code>) drives all stages in Agent mode, with four parallel subagents. Bob also <b>built its own delivery tool</b> during the project: a standard-library MCP email server (<code>send_onboarding_email</code>, 14 passing unit tests) with a dry-run mode. In the demo run it hit a bug (an attachment parameter mismatch), fixed it, and re-sent. Dates, file names and all checks are deterministic code, so runs are repeatable, and everything client-specific lives in one <code>instances/</code> folder — a new company is a folder, not a code change.</p>
+    <h3 style="margin:36px 0 12px">Run it yourself</h3>
+    <ol class="bullets">
+      <li>Clone the <a href="https://github.com/arisyasyahirah/NORTHWIND-LABS-bob2.0-hackathon-submission-">submission repo</a> and open <code>bob-onboarding-workspace/</code> as the workspace in IBM Bob IDE.</li>
+      <li>Check the toolchain: <code>py -3 scripts/selftest.py</code> (or <code>python3</code> on macOS/Linux).</li>
+      <li>In Bob, run <code>/onboard @CTMS_Project @hires/alex-tan.yaml</code> and answer the intake questions.</li>
+      <li>Approve the flagged list when Bob stops. Add SMTP details to <code>.env</code> to send real emails; without them the email step runs in dry-run mode.</li>
+    </ol>
+    <p class="note">To use it on your own project, point <code>/onboard</code> at your repo and write a new <code>hires/&lt;name&gt;.yaml</code> — a new hire is a new file, not a code change.</p>
     <div class="links" style="margin-top:18px">
       <a class="btn dark" href="https://github.com/arisyasyahirah/NORTHWIND-LABS-bob2.0-hackathon-submission-">Full source &amp; Bob usage write-up</a>
     </div>
