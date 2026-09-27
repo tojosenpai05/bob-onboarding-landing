@@ -33,7 +33,7 @@ a:hover{text-decoration-color:var(--ink)}
 :focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
 .skip{position:absolute;left:-999px;top:0;background:var(--yellow);color:var(--ink);padding:8px 12px;z-index:10}
 .skip:focus{left:8px}
-.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.wrap{max-width:1200px;margin:0 auto;padding:0 clamp(20px,4vw,40px)}
 .eyebrow{font-family:var(--mono);font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
 h1,h2,h3{line-height:1.15;margin:0;text-wrap:balance}
 h2{font-size:clamp(1.7rem,3.2vw,2.4rem);font-weight:700;letter-spacing:-.01em}
@@ -53,14 +53,16 @@ p{margin:0 0 1em;max-width:68ch}
 @media (max-width:820px){.nav ul{display:none}}
 
 /* hero */
-.hero{background:var(--ink);color:#fff;padding:64px 0 72px}
-.hero .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center}
+.hero{background:var(--ink);color:#fff;padding:clamp(44px,7vw,80px) 0 clamp(52px,8vw,88px)}
+.hero .wrap{display:grid;grid-template-columns:1fr 1fr;gap:clamp(32px,5vw,64px);align-items:center}
 .hero .eyebrow{color:var(--yellow)}
-.hero h1{font-size:clamp(2.2rem,4.4vw,3.2rem);font-weight:700;letter-spacing:-.02em;margin:14px 0 18px}
+.hero h1{font-size:clamp(2.1rem,3.8vw,3.2rem);font-weight:700;letter-spacing:-.02em;margin:16px 0 20px}
 .hero h1 span{background:var(--yellow);color:var(--ink);padding:0 .15em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .hero .lead{color:#d6d5cf}
 .hero code{font-family:var(--mono);background:#262624;color:var(--yellow);padding:1px 6px;border-radius:4px;font-size:.92em}
-.ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.ctas{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin-top:28px}
+.textlink{color:var(--yellow);font-weight:600;text-decoration:none;white-space:nowrap}
+.textlink:hover{text-decoration:underline}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;font-weight:600;text-decoration:none;border:2px solid var(--yellow);border-radius:6px;font-size:.98rem}
 .btn.primary{background:var(--yellow);color:var(--ink)}
 .btn.ghost{color:var(--yellow)}
@@ -72,7 +74,7 @@ p{margin:0 0 1em;max-width:68ch}
 
 /* at a glance */
 .glance{background:var(--yellow);padding:0;border-bottom:none}
-.glance ol{list-style:none;margin:0 auto;padding:34px 20px;max-width:1120px;display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.glance ol{list-style:none;margin:0 auto;padding:clamp(28px,4vw,40px) clamp(20px,4vw,40px);max-width:1200px;display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
 .glance li{background:var(--surface);border-radius:8px;padding:22px;position:relative}
 .glance li:not(:last-child)::after{content:"→";position:absolute;right:-19px;top:50%;transform:translateY(-50%);font-weight:700;font-size:1.3rem}
 .glance .k{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
@@ -238,13 +240,13 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:.95r
 <header class="hero" id="top">
   <div class="wrap">
     <div>
-      <span class="eyebrow">IBM Bob 2.0 Hackathon · Bob Onboarding Pipeline</span>
+      <span class="eyebrow">IBM Bob 2.0 Hackathon entry</span>
       <h1>Bob writes every new hire's onboarding pack <span>from the real code</span>.</h1>
-      <p class="lead">New developers spend weeks figuring out a codebase while seniors keep re-explaining it. We built a skill for IBM Bob IDE: a manager types <code>/onboard</code>, Bob reads the repository, and the new hire gets a personalised guide, a narrated code tour, the known issues, and a ready-made context for their own Bob. Everything is checked against the code, and a person approves it before it's sent.</p>
+      <p class="lead">New hires spend weeks decoding a codebase while seniors keep re-explaining it. With one <code>/onboard</code> command in IBM Bob IDE, Bob reads the repo and hands the new hire a personalised guide, a narrated code tour and the known issues — checked against the code and approved by a manager before it's sent.</p>
       <div class="ctas">
         <a class="btn primary" href="#pipeline">How it works</a>
         <a class="btn ghost" href="#demo">See the real output</a>
-        <a class="btn ghost" href="https://github.com/arisyasyahirah/NORTHWIND-LABS-bob2.0-hackathon-submission-">Source on GitHub</a>
+        <a class="textlink" href="https://github.com/arisyasyahirah/NORTHWIND-LABS-bob2.0-hackathon-submission-">Source on GitHub →</a>
       </div>
     </div>
     <figure>
