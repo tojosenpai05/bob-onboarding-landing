@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bob Onboarding Pipeline</title>
+<meta name="description" content="One /onboard command in IBM Bob IDE scans a real codebase and builds a personalised onboarding pack per hire: PDF, narrated code tour, one file per real issue, and a context folder for their own Bob.">
+<meta property="og:title" content="Bob Onboarding Pipeline">
+<meta property="og:description" content="A Bob-native pipeline that turns 'explain the codebase' into one command — grounded in the real repo, approved by a human.">
+<meta property="og:image" content="assets/video/tour-poster.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23111'/%3E%3Crect x='8' y='8' width='16' height='16' fill='%23f5b800'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#111111; --ink-2:#3d3d3a; --muted:#6b6a65;
+  --paper:#fafaf7; --surface:#ffffff; --line:#e4e2da;
+  --yellow:#f5b800; --yellow-soft:#fff4cc;
+  --crit:#b42318; --crit-bg:#fde8e6;
+  --high:#b54708; --high-bg:#fef0e1;
+  --med:#7a5b00; --med-bg:#fdf6d8;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6;font-size:17px}
+img,video,iframe{max-width:100%;display:block}
+a{color:inherit;text-decoration-color:var(--yellow);text-decoration-thickness:2px;text-underline-offset:3px}
+a:hover{text-decoration-color:var(--ink)}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+.skip{position:absolute;left:-999px;top:0;background:var(--yellow);color:var(--ink);padding:8px 12px;z-index:10}
+.skip:focus{left:8px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.eyebrow{font-family:var(--mono);font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+h1,h2,h3{line-height:1.15;margin:0;text-wrap:balance}
+h2{font-size:clamp(1.7rem,3.2vw,2.4rem);font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.15rem;font-weight:600}
+p{margin:0 0 1em;max-width:68ch}
+.lead{font-size:1.15rem;color:var(--ink-2)}
+.note{font-size:.9rem;color:var(--muted)}
+
+/* nav */
+.nav{background:var(--ink);color:#fff;position:sticky;top:0;z-index:5;border-bottom:1px solid #2a2a2a}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:58px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--yellow)}
+.brand i{width:14px;height:14px;background:var(--yellow);display:inline-block}
+.nav ul{display:flex;gap:22px;list-style:none;margin:0;padding:0;font-size:.92rem}
+.nav ul a{color:#d9d9d4;text-decoration:none}
+.nav ul a:hover{color:var(--yellow)}
+@media (max-width:820px){.nav ul{display:none}}
+
+/* hero */
+.hero{background:var(--ink);color:#fff;padding:64px 0 72px}
+.hero .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center}
+.hero .eyebrow{color:var(--yellow)}
+.hero h1{font-size:clamp(2.4rem,5.4vw,3.9rem);font-weight:700;letter-spacing:-.02em;margin:14px 0 18px}
+.hero h1 span{background:var(--yellow);color:var(--ink);padding:0 .15em}
+.hero .lead{color:#d6d5cf}
+.hero code{font-family:var(--mono);background:#262624;color:var(--yellow);padding:1px 6px;border-radius:4px;font-size:.92em}
+.ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;font-weight:600;text-decoration:none;border:2px solid var(--yellow);border-radius:6px;font-size:.98rem}
+.btn.primary{background:var(--yellow);color:var(--ink)}
+.btn.ghost{color:var(--yellow)}
+.btn:hover{filter:brightness(1.08)}
+.hero figure{margin:0}
+.hero video{width:100%;border-radius:8px;border:1px solid #333;background:#000;aspect-ratio:16/9}
+.hero figcaption{font-size:.85rem;color:#a9a8a1;margin-top:10px}
+@media (max-width:900px){.hero .wrap{grid-template-columns:1fr}}
+
+/* stat strip */
+.strip{background:var(--yellow)}
+.strip ul{list-style:none;margin:0 auto;padding:22px 20px;max-width:1120px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.strip b{display:block;font-size:clamp(1.5rem,3vw,2.1rem);line-height:1.1}
+.strip span{font-size:.9rem;color:#3b3000}
+@media (max-width:700px){.strip ul{grid-template-columns:repeat(2,1fr)}}
+
+/* sections */
+section{padding:84px 0;border-bottom:1px solid var(--line)}
+section.alt{background:var(--surface)}
+.head{margin-bottom:34px}
+.head .eyebrow{color:var(--muted);display:block;margin-bottom:10px}
+.head .eyebrow::before{content:"";display:inline-block;width:22px;height:4px;background:var(--yellow);vertical-align:middle;margin-right:10px}
+.head p{margin-top:14px}
+
+/* big stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:28px 0}
+.stat{background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--yellow);padding:22px;border-radius:6px}
+section.alt .stat{background:var(--paper)}
+.stat b{font-size:2.6rem;line-height:1;display:block;margin-bottom:10px;letter-spacing:-.02em}
+.stat p{font-size:.97rem;margin:0 0 10px}
+.stat cite{font-style:normal;font-size:.82rem;color:var(--muted)}
+@media (max-width:820px){.stats{grid-template-columns:1fr}}
+
+/* details */
+details{border:1px solid var(--line);border-radius:6px;background:var(--surface);margin-top:14px}
+details summary{cursor:pointer;padding:16px 20px;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:12px}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"+";font-family:var(--mono);font-size:1.2rem;line-height:1}
+details[open] summary::after{content:"–"}
+details .inner{padding:0 20px 20px}
+
+/* tables */
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem;background:var(--surface)}
+.tbl th,.tbl td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--paper)}
+.tbl td.src{font-size:.86rem;color:var(--ink-2);min-width:200px}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+.pill{display:inline-block;font-family:var(--mono);font-size:.74rem;font-weight:600;padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.05em}
+.pill.critical{background:var(--crit-bg);color:var(--crit)}
+.pill.high{background:var(--high-bg);color:var(--high)}
+.pill.medium{background:var(--med-bg);color:var(--med)}
+.id{font-family:var(--mono);font-size:.85rem;white-space:nowrap}
+
+/* steps */
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:26px}
+.step{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:32px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:26px}
+.step.noimg{grid-template-columns:1fr}
+.step .num{font-family:var(--mono);font-weight:600;background:var(--ink);color:var(--yellow);display:inline-block;padding:3px 10px;border-radius:4px;font-size:.85rem;margin-bottom:12px}
+.step h3{margin-bottom:8px}
+.step p{margin:0;color:var(--ink-2)}
+.step a.shot{display:block;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#1b1b1b}
+.step a.shot img{width:100%;height:auto;max-height:340px;object-fit:cover;object-position:top left}
+.step .gate{border-left:4px solid var(--yellow);padding-left:12px;margin-top:10px;font-size:.92rem}
+@media (max-width:820px){.step{grid-template-columns:1fr;padding:20px}}
+
+/* demo */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:24px}
+section.alt .card{background:var(--paper)}
+.card h3{margin-bottom:6px}
+.card video{width:100%;border-radius:6px;background:#000;aspect-ratio:16/9;margin:14px 0 10px}
+.pdf{width:100%;height:620px;border:1px solid var(--line);border-radius:6px;margin:14px 0}
+@media (max-width:700px){.pdf{height:420px}}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.links a{font-size:.92rem;font-weight:600}
+.btn.dark{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.line{border-color:var(--ink);color:var(--ink)}
+
+/* compare */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:0;border:2px solid var(--ink);border-radius:10px;overflow:hidden;margin:18px 0}
+.compare > div{padding:28px}
+.compare .manual{background:var(--surface)}
+.compare .bob{background:var(--ink);color:#fff}
+.compare .label{font-family:var(--mono);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.compare .bob .label{color:var(--yellow)}
+.compare .big{font-size:clamp(2.2rem,5vw,3.2rem);font-weight:700;line-height:1.05;margin:10px 0 4px;letter-spacing:-.02em}
+.compare .bob .big{color:var(--yellow)}
+.compare .sub{font-size:1.05rem;font-weight:600;margin-bottom:12px}
+.compare p{font-size:.92rem;margin:0}
+.compare .manual p{color:var(--ink-2)}
+.compare .bob p{color:#cfcec8}
+@media (max-width:760px){.compare{grid-template-columns:1fr}}
+.callout{background:var(--yellow-soft);border-left:5px solid var(--yellow);padding:16px 20px;border-radius:4px;margin:18px 0}
+.callout p{margin:0}
+
+/* lists */
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.checks li{padding-left:30px;position:relative}
+.checks li::before{position:absolute;left:0;top:1px;font-family:var(--mono);font-weight:600}
+.pros li::before{content:"+";color:#0f7a3a;font-size:1.2rem;line-height:1.2}
+.cons li::before{content:"!";color:var(--high);font-size:1.05rem}
+.checks b{display:block}
+.checks span{color:var(--ink-2);font-size:.95rem}
+.checks em{display:block;font-style:normal;font-size:.88rem;color:var(--muted);margin-top:4px}
+.bullets{padding-left:20px;margin:0}
+.bullets li{margin-bottom:12px}
+
+/* footer */
+footer{background:var(--ink);color:#cfcec8;padding:48px 0}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:24px}
+footer a{color:#fff}
+footer .brand{margin-bottom:10px}
+footer ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:.95rem}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<nav class="nav" aria-label="Primary">
+  <div class="wrap">
+    <a class="brand eyebrow" href="#top"><i aria-hidden="true"></i>Bob Onboarding Pipeline</a>
+    <ul>
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#demo">Demo</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#research">Research</a></li>
+      <li><a href="https://github.com/arisyasyahirah/NORTHWIND-LABS-bob2.0-hackathon-submission-">GitHub</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">IBM Bob 2.0 Hackathon · Proof of concept</span>
+      <h1>Onboard a new hire with <span>one command</span>.</h1>
+      <p class="lead">One <code>/onboard</code> command in IBM Bob IDE scans a real codebase and hands a new hire a personalised onboarding pack — a PDF, a narrated code tour, one file per real issue found, and a context folder for their own Bob. Every claim is checked against the code, and a human approves before anything is sent.</p>
+      <div class="ctas">
+        <a class="btn primary" href="#demo">See the real output</a>
+        <a class="btn ghost" href="assets/northwind-labs-onboarding-alex-tan.pdf">Read the PDF</a>
+        <a class="btn ghost" href="https://github.com/arisyasyahirah/NORTHWIND-LABS-bob2.0-hackathon-submission-">Source on GitHub</a>
+      </div>
+    </div>
+    <figure>
+      <video controls preload="metadata" poster="assets/video/tour-poster.jpg">
+        <source src="assets/video/tour.mp4" type="video/mp4">
+      </video>
+      <figcaption>The 97-second narrated code tour Bob generated for "Alex Tan", a junior backend hire. Every line traces back to a fact in the PDF.</figcaption>
+    </figure>
+  </div>
+</header>
+
+<div class="strip" role="region" aria-label="Demo run at a glance">
+  <ul>
+    <li><b>10</b><span>real issues found, each cited to file:line</span></li>
+    <li><b>7 pages</b><span>personalised onboarding PDF</span></li>
+    <li><b>~21 min</b><span>unattended machine time for the pack</span></li>
+    <li><b>~1 min</b><span>of human approval</span></li>
+  </ul>
+</div>
+
+<main id="main">
+
+<section id="problem">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">The problem</span>
+      <h2>Onboarding runs on a stale README and a senior's memory.</h2>
+      <p class="lead">Every new hire gets a different ramp-up, and the team pays twice: the newcomer's time spent figuring the code out, and the senior's time spent re-explaining it. This isn't an anecdote — independent studies keep landing on the same pattern.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <b>58%</b>
+        <p>of a developer's time goes to understanding code, not writing it — juniors spend the most.</p>
+        <cite>Xia et al., IEEE TSE 2018 · 79 devs, 3,244 hours</cite>
+      </div>
+      <div class="stat">
+        <b>61%</b>
+        <p>of managers spend 30+ minutes a day <em>answering</em> questions — the same share of developers spend 30+ minutes searching.</p>
+        <cite>Stack Overflow Developer Survey 2024 · ~65k devs</cite>
+      </div>
+      <div class="stat">
+        <b>17.4%</b>
+        <p>employee turnover in Malaysia — the highest in Southeast Asia — so onboarding happens again and again.</p>
+        <cite>Aon SEA Turnover Study 2026 · 1,200+ businesses</cite>
+      </div>
+    </div>
+
+    <p>Put together: understanding code is the <strong>dominant</strong> activity, the knowledge that would speed it up is tacit and undocumented, and when it's missing the cost doesn't disappear — it moves onto a senior's calendar as interruptions. This pipeline writes that knowledge down once per hire, with citations back to real files and lines.</p>
+
+    <details>
+      <summary>See the research behind this (5 independent sources, then SEA → Malaysia)</summary>
+      <div class="inner">
+        <p class="note">Four different methods — a time-diary field study, a 65,000-developer survey, an industry DX survey, and interviews at Microsoft — none citing each other, all pointing at the same problem.</p>
+        <div class="scroll">
+          <table class="tbl">
+            <thead><tr><th>Finding</th><th>Source</th></tr></thead>
+            <tbody>
+              <tr><td>Developers spend <b>~58% of their time</b> on program comprehension (79 devs, 3,244 working hours, field study).</td><td class="src">Xia et al., IEEE TSE 2018 — <a href="https://baolingfeng.github.io/papers/tsecomprehension.pdf">PDF</a></td></tr>
+              <tr><td><b>61%</b> of developers spend 30+ min/day searching for answers; <b>61%</b> of managers spend 30+ min/day answering them.</td><td class="src">Stack Overflow Developer Survey 2024 — <a href="https://survey.stackoverflow.co/2024/professional-developers">link</a></td></tr>
+              <tr><td><b>50%</b> of developers lose <b>10+ hours/week</b> to non-coding friction; the #1 time-waster is <i>finding information</i>.</td><td class="src">Atlassian State of DevEx 2025 — <a href="https://www.atlassian.com/blog/bitbucket/developer-experience-report-2025">link</a></td></tr>
+              <tr><td><b>82%</b> say understanding <i>why</i> code is built the way it is takes real effort; <b>66%</b> call it a serious problem. Developers skip design docs they don't trust and <b>interrupt teammates instead</b>.</td><td class="src">LaToza et al., ICSE 2006 (Microsoft) — <a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/p492-latoza.pdf">PDF</a></td></tr>
+              <tr><td>Newcomers ask <b>44 recurring types of questions</b> ("where is X?", "how does this data get here?") that no single document answers.</td><td class="src">Sillito et al., FSE 2006 — <a href="https://dl.acm.org/doi/10.1145/1181775.1181779">DOI</a></td></tr>
+              <tr><td>Only <b>12%</b> of employees strongly agree their company onboards well; <b>80%</b> of new hires who feel undertrained plan to quit soon, vs <b>7%</b> of those who feel well-trained.</td><td class="src">Gallup (via <a href="https://fullscale.io/blog/developer-onboarding-best-practices/">Full Scale</a>) · Paychex/Fortune — <a href="https://www.paychex.com/articles/human-resources/the-onboarding-crisis">link</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3 style="margin:26px 0 10px">Narrowing to Southeast Asia, then Malaysia</h3>
+        <ul class="bullets">
+          <li>SEA turnover is <b>16.6%</b>; <b>Malaysia is the highest at 17.4%</b> — <a href="https://www.aon.com/apac/in-the-press/asia-newsroom/2026/aon-projects-southeast-asia-salary-increases-to-remain-stable-at-5-2-in-2027">Aon, 2026</a>.</li>
+          <li><b>63%</b> of Malaysian tech professionals intend to change jobs within 12 months, vs <b>53%</b> globally — <a href="https://www.hays.com.my/press-release/content/tech-talent-on-the-move">Hays Malaysia, 2025</a>.</li>
+          <li>A roughly <b>10× shortfall</b>: 50,000 skilled engineers needed, ~5,000 graduates a year — <a href="https://thediplomat.com/2026/05/malaysias-tech-talent-shortage/">The Diplomat, 2026</a>. Companies can't hire their way out; they have to make less-experienced hires productive faster.</li>
+          <li><b>Gap, stated plainly:</b> no study measures onboarding itself in Malaysia. The turnover and shortage data is local and solid; the link to onboarding quality is inferred from the international research above.</li>
+        </ul>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section id="how" class="alt">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">How it works</span>
+      <h2>Eight stages, one command, a human in the loop.</h2>
+      <p class="lead">A packaged Bob skill runs the whole flow in Agent mode. Screenshots below are from the real run — not mockups.</p>
+    </div>
+    <ol class="steps">
+      <li class="step">
+        <div><span class="num">01</span><h3>Preflight</h3><p>Bob activates the <code>onboarding-pipeline</code> skill, and checks that its email MCP server is built and registered.</p></div>
+        <a class="shot" href="assets/shots/1-preflight.png"><img src="assets/shots/1-preflight.png" alt="Bob IDE: Bob explores the workspace and asks to approve the onboarding-pipeline skill." loading="lazy" width="716" height="962"></a>
+      </li>
+      <li class="step">
+        <div><span class="num">02</span><h3>Intake</h3><p>Bob asks for the codebase (opened read-only, never modified), the company, and the hire's role, dates, manager and buddy. It probes the repo and confirms what it found before going further.</p></div>
+        <a class="shot" href="assets/shots/2-intake-probe.png"><img src="assets/shots/2-intake-probe.png" alt="Bob probes the target codebase, reports languages and structure, and asks to confirm it is the right project." loading="lazy" width="986" height="511"></a>
+      </li>
+      <li class="step">
+        <div><span class="num">03</span><h3>Generate — 4 subagents in parallel</h3><p>Company &amp; role, architecture &amp; code tour, issue scan, and tech stack all run at once against the real repo.</p></div>
+        <a class="shot" href="assets/shots/3-parallel-subagents.png"><img src="assets/shots/3-parallel-subagents.png" alt="Four Bob subagents running in parallel: role, tech stack, architecture, and issue files." loading="lazy" width="1027" height="457"></a>
+      </li>
+      <li class="step">
+        <div><span class="num">04</span><h3>Deterministic check</h3><p>Plain Python — not the model — verifies that every cited file and line exists in the repo, that issue files follow the template, and that the video script only retells facts already in the pack. When a check fails, a bounded fix loop repairs it (max 3 tries per stage) or asks the user.</p><p class="gate">Nothing is graded by the thing that wrote it.</p></div>
+        <a class="shot" href="assets/shots/4-check-passes.png"><img src="assets/shots/4-check-passes.png" alt="Bob IDE log: the stage 3 check passes and the pipeline moves on to the flag stage." loading="lazy" width="990" height="420"></a>
+      </li>
+      <li class="step noimg">
+        <div><span class="num">05</span><h3>Flag</h3><p>Anything Bob couldn't confirm is written as "Unknown — ask your buddy" and listed on a short flagged-for-review list (3–6 bullets), instead of being buried or invented.</p></div>
+      </li>
+      <li class="step">
+        <div><span class="num">06</span><h3>Human approval — hard stop</h3><p>A person reviews the flagged list and the issue index, and must approve before anything is rendered or sent. Tool auto-approve does not count as approval.</p></div>
+        <a class="shot" href="assets/shots/6-human-approval.png"><img src="assets/shots/6-human-approval.png" alt="Stage 5 human approval: the issue table with file locations and dates, and approve / skip video / review script / correct options." loading="lazy" width="1086" height="926"></a>
+      </li>
+      <li class="step">
+        <div><span class="num">07</span><h3>Render</h3><p>The approved pack becomes a branded PDF and, if requested, a narrated video tour (Piper text-to-speech + ffmpeg, real code excerpts, credential-looking lines masked).</p></div>
+        <a class="shot" href="assets/shots/7-pdf-render.png"><img src="assets/shots/7-pdf-render.png" alt="The rendered onboarding PDF open in Bob IDE, showing the contents page and the hire and timeline cards." loading="lazy" width="1125" height="950"></a>
+      </li>
+      <li class="step">
+        <div><span class="num">08</span><h3>Package &amp; send</h3><p>The context folder is zipped, a setup guide is generated, and the newcomer and manager each get an email through an MCP server Bob built during the project. Replies go to the newcomer's buddy.</p></div>
+        <a class="shot" href="assets/shots/8-email-delivered.png"><img src="assets/shots/8-email-delivered.png" alt="The branded welcome email received in the test inbox, with the PDF, video and context zip listed." loading="lazy" width="1917" height="867"></a>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">See it in action</span>
+      <h2>The real output from one run.</h2>
+      <p class="lead">Generated for "Alex Tan", a fictional junior backend engineer joining Northwind Labs, against a real Java/JSP codebase (a cinema ticket management system).</p>
+    </div>
+
+    <div class="card">
+      <h3>The onboarding PDF — 7 pages</h3>
+      <p class="note">Company, role, architecture, a code tour, the issues found, starter tasks, people to meet, and a dated 90-day timeline.</p>
+      <iframe class="pdf" src="assets/northwind-labs-onboarding-alex-tan.pdf#view=FitH" title="Northwind Labs onboarding PDF for Alex Tan"></iframe>
+      <div class="links">
+        <a class="btn dark" href="assets/northwind-labs-onboarding-alex-tan.pdf">Open the PDF</a>
+        <a class="btn line" href="assets/northwind-labs-onboarding-alex-tan-context.zip" download>Download the context pack (.zip)</a>
+      </div>
+      <p class="note" style="margin-top:12px">The context pack is what the newcomer loads into their own Bob, so their assistant already knows the company, their role, and the codebase.</p>
+    </div>
+
+    <h3 style="margin:48px 0 6px">Both sides of a real run</h3>
+    <p class="note">Screen recordings of the real run, from the two people this is built for.</p>
+    <div class="grid2">
+      <div class="card">
+        <h3>The manager's session</h3>
+        <p class="note">7:25 · Running <code>/onboard</code> in Bob IDE, through approval, render and send.</p>
+        <video controls preload="none" poster="assets/video/manager-poster.jpg">
+          <source src="assets/video/manager-session.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="card">
+        <h3>The newcomer's side</h3>
+        <p class="note">2:42 · Opening the welcome email, setting up Bob with the context pack, and asking it about the codebase.</p>
+        <video controls preload="none" poster="assets/video/newcomer-poster.jpg">
+          <source src="assets/video/newcomer-session.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="issues" class="alt">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">What Bob found</span>
+      <h2>10 real issues, each with evidence.</h2>
+      <p class="lead">Straight from the generated pack. Every issue is its own file with the file and line, and guidance for the newcomer — never a silent patch.</p>
+    </div>
+    <div class="scroll">
+      <table class="tbl">
+        <thead><tr><th>ID</th><th>Issue</th><th>Severity</th></tr></thead>
+        <tbody>
+          <tr><td class="id">ISSUE-001</td><td>Hardcoded database credentials in source code</td><td><span class="pill critical">critical</span></td></tr>
+          <tr><td class="id">ISSUE-002</td><td>Hardcoded Stripe API key and webhook secret</td><td><span class="pill critical">critical</span></td></tr>
+          <tr><td class="id">ISSUE-003</td><td>Passwords stored and compared in plain text</td><td><span class="pill critical">critical</span></td></tr>
+          <tr><td class="id">ISSUE-004</td><td>SQL syntax bug in <code>CustomerDAO.deleteCustomer</code></td><td><span class="pill high">high</span></td></tr>
+          <tr><td class="id">ISSUE-005</td><td>No unit or integration tests in the repository</td><td><span class="pill high">high</span></td></tr>
+          <tr><td class="id">ISSUE-006</td><td>Database connection per request (no connection pool)</td><td><span class="pill high">high</span></td></tr>
+          <tr><td class="id">ISSUE-007</td><td>Duplicate servlet declarations in <code>web.xml</code></td><td><span class="pill medium">medium</span></td></tr>
+          <tr><td class="id">ISSUE-008</td><td>AuthFilter doesn't handle a null session attribute safely</td><td><span class="pill medium">medium</span></td></tr>
+          <tr><td class="id">ISSUE-009</td><td>Customer password exposed in session / model object</td><td><span class="pill medium">medium</span></td></tr>
+          <tr><td class="id">ISSUE-010</td><td>No input validation or output encoding on JSP pages</td><td><span class="pill medium">medium</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">Results</span>
+      <h2>What one run produced, from the pipeline's own log.</h2>
+    </div>
+    <div class="scroll">
+      <table class="tbl">
+        <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Issues found</td><td>10 (including 3 sets of hardcoded credentials)</td></tr>
+          <tr><td>PDF</td><td>7 pages</td></tr>
+          <tr><td>Narrated video</td><td>97 s, 4 MB</td></tr>
+          <tr><td>Emails sent</td><td>2 (newcomer + manager) through a Bob-built MCP server, to a test inbox</td></tr>
+          <tr><td>Machine time — the pack</td><td>~21 min (intake → generate → check → render PDF → package → send)</td></tr>
+          <tr><td>Machine time — optional video</td><td>35 min in this run (a layout fix loop, then a re-render)</td></tr>
+          <tr><td>Human approval</td><td>~1 min</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin:48px 0 6px">Time &amp; cost: the manual alternative</h3>
+    <p class="note">For a senior writing the equivalent pack by hand, costed at a Malaysian senior developer's rate.</p>
+    <div class="compare">
+      <div class="manual">
+        <span class="label">A senior writes it by hand</span>
+        <div class="big">RM 220–680</div>
+        <div class="sub">~4–8 hours of senior time</div>
+        <p>Architecture walkthrough, ownership map, 10 issues investigated and written up with evidence, a dated timeline, and a manager brief.</p>
+      </div>
+      <div class="bob">
+        <span class="label">Bob Onboarding Pipeline</span>
+        <div class="big">under RM 5</div>
+        <div class="sub">~3 min of senior time</div>
+        <p>Answering the intake questions and approving the flagged list. Bob does the rest unattended.</p>
+      </div>
+    </div>
+    <div class="callout">
+      <p><b>How we got these numbers — it's an estimate, and we show the working.</b> No published study measures "hours to hand-write one onboarding pack", so we built it up: the closest real benchmark is ~2 hours for a single developer-workflow doc (<a href="https://document360.com/blog/code-documentation/">Document360</a>), and this pack has 4–5 such sections plus 10 investigated issues. Senior rate RM 55–85/hour (<a href="https://www.secondtalent.com/developer-rate-card/malaysia/">Second Talent, 2026</a>). That's roughly a <b>98–99% cut in the senior's own time</b>. Full working: <a href="https://github.com/tojosenpai05/bob-onboarding-landing/blob/main/research/synthesis/06-time-cost-comparison.md">time &amp; cost research notes</a>.</p>
+    </div>
+
+    <h3 style="margin:48px 0 14px">Impact, if this scales</h3>
+    <p class="note">Projected, not measured — this proof of concept ran on one project.</p>
+    <ul class="bullets">
+      <li>Understanding code takes <b>~58% of developer time</b> (Xia et al.). The pack targets that cost directly by front-loading architecture, ownership and known issues. This run didn't measure a reduction.</li>
+      <li>Replacing a technical hire costs <b>100–150% of their annual salary</b> (<a href="https://builtin.com/recruiting/cost-of-turnover">Gallup / PeopleKeep via Built In</a>), and new hires who feel undertrained are far more likely to quit (80% vs 7%, Paychex). The hours saved per hire are the small, provable number — this is the larger risk it hedges.</li>
+      <li>New hires reach their 10th pull request in <b>49 days with daily AI help vs 91 without</b> (<a href="https://getdx.com/blog/ai-cuts-developer-onboarding-time-in-half/">DX, 2025</a>). The source flags this as correlational, not causal — the closest available signal for faster ramp-up, not proof of this pipeline's effect.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="tradeoffs" class="alt">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">Advantages &amp; limitations</span>
+      <h2>What it does well, and what it doesn't do yet.</h2>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-bottom:18px">Advantages</h3>
+        <ul class="checks pros">
+          <li><b>Personalised per hire.</b><span>Role, level, dates, buddy and starter tasks are specific to one person — comparable tools generate one tour per repo for everyone.</span></li>
+          <li><b>Ready before day one.</b><span>A PDF and an email need no tool install; an IDE-embedded tour needs setup before it helps.</span></li>
+          <li><b>Grounded, not self-graded.</b><span>A deterministic check, not the model, confirms every citation exists in the repo.</span></li>
+          <li><b>A human always signs off.</b><span>Review is narrowed to a short flagged list, not skipped — like a code review showing only the diff.</span></li>
+          <li><b>Fresh for every hire.</b><span>Regenerated from the live repo each time, so it doesn't go stale like a one-off tour.</span></li>
+          <li><b>Questions go to a real person.</b><span>Replies to the welcome email reach the newcomer's buddy — no new Q&amp;A system to maintain.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:18px">Limitations &amp; next steps</h3>
+        <ul class="checks cons">
+          <li><b>Tested on one project so far.</b><span>Not yet validated across several codebases or a real onboarding cohort.</span><em>Next: run it on a second, larger codebase, and time a senior doing the same pack by hand.</em></li>
+          <li><b>The Malaysia case is inferred.</b><span>Local turnover and shortage data is solid, but no local study measures onboarding itself.</span><em>Next: a regional onboarding study if this moves past a proof of concept.</em></li>
+          <li><b>Some supporting research is early-stage.</b><span>Several studies are preprints or small samples; the headline claims lean on the large peer-reviewed ones.</span></li>
+          <li><b>No live Q&amp;A tool.</b><span>Follow-up questions go to the buddy by email, by design — a named mentor already does this job well.</span></li>
+          <li><b>Runs interactively in Bob IDE.</b><span>It doesn't depend on headless or CI execution, which wasn't confirmed for this build.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="research">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">Grounded in research</span>
+      <h2>Why it's built this way.</h2>
+      <p class="lead">The problem section sources <i>why onboarding hurts</i>. These sources back <i>the design choices</i>.</p>
+    </div>
+    <div class="scroll">
+      <table class="tbl">
+        <thead><tr><th>Design choice</th><th>Backed by</th></tr></thead>
+        <tbody>
+          <tr><td><b>A human curates before anything is sent</b></td><td>Expert-curated code tours scored <b>83%</b> on comprehension quizzes vs <b>57%</b> for AI-only tours, in a real deployment at Beko — LACY, <a href="https://arxiv.org/abs/2603.25391">arXiv 2603.25391</a></td></tr>
+          <tr><td><b>Personalised, with starter tasks and checkpoints</b></td><td>Newcomers integrate through early experimentation and being able to check their own progress — Dagenais et al., ICSE 2010 (IBM Research), <a href="https://research.ibm.com/publications/moving-into-a-new-software-project-landscape">link</a></td></tr>
+          <tr><td><b>Written for less-experienced hires</b></td><td>Malaysian employers' biggest graduate skill gaps are communication &amp; collaboration, then problem-solving (376 employers) — Tee et al., <a href="https://f1000research.com/articles/13-389">F1000Research 2024</a></td></tr>
+          <tr><td><b>A PDF with diagrams and tables, not a wall of email text</b></td><td>Text + diagrams give consistent learning gains (pooled g = 0.37) — Mayer multimedia meta-analysis, <a href="https://experts.illinois.edu/en/publications/a-meta-analysis-of-richard-mayers-multimedia-learning-research-se/">link</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note" style="margin-top:14px">Full research notes, including every source we dropped because it didn't check out: <a href="https://github.com/tojosenpai05/bob-onboarding-landing/tree/main/research">research/</a>.</p>
+  </div>
+</section>
+
+<section id="under-the-hood" class="alt">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">Under the hood</span>
+      <h2>Bob-native, end to end.</h2>
+    </div>
+    <p>This isn't a hosted web app — the pipeline runs inside IBM Bob IDE. A packaged Bob skill (<code>/onboard</code>) drives all stages in Agent mode, with four parallel subagents. Bob also <b>built its own delivery tool</b> during the project: a standard-library MCP email server (<code>send_onboarding_email</code>, 14 passing unit tests) with a dry-run mode. In the demo run it hit a bug (an attachment parameter mismatch), fixed it, and re-sent. Dates, file names and all checks are deterministic code, so runs are repeatable, and everything client-specific lives in one <code>instances/</code> folder — a new company is a folder, not a code change.</p>
+    <div class="links" style="margin-top:18px">
+      <a class="btn dark" href="https://github.com/arisyasyahirah/NORTHWIND-LABS-bob2.0-hackathon-submission-">Full source &amp; Bob usage write-up</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <div class="brand eyebrow"><i aria-hidden="true"></i>Bob Onboarding Pipeline</div>
+      <p style="margin:0;font-size:.95rem">Built for the IBM Bob 2.0 Hackathon (lablab.ai). Proof of concept, tested on one project so far.</p>
+    </div>
+    <ul>
+      <li><a href="https://github.com/arisyasyahirah/NORTHWIND-LABS-bob2.0-hackathon-submission-">Submission repo</a></li>
+      <li><a href="https://github.com/arisyasyahirah/NORTHWIND-LABS">Demo codebase (Northwind Labs)</a></li>
+      <li><a href="https://github.com/tojosenpai05/bob-onboarding-landing">This site's source</a></li>
+    </ul>
+  </div>
+</footer>
+</body>
+</html>
